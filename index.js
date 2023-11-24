@@ -42,9 +42,16 @@ async function run() {
           title:{$regex: filter.search, $options: "i"}
         }
       }
+      if(filter.category){
+        query = {
+          category: filter.category
+        }
+      }
+     
       let options = {}
       if(filter?.sort){
         options = {
+          // TODO: change the like property to totalVote
           sort: {
             like: filter.sort === "asc" ? 1 : -1
           }
