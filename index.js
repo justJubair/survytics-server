@@ -1,17 +1,13 @@
-require('dotenv').config()
-const express = require("express")
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const app = express()
-const cors = require("cors")
-const port = process.env.PORT || 5000
-
+require("dotenv").config();
+const express = require("express");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const app = express();
+const cors = require("cors");
+const port = process.env.PORT || 5000;
 
 // middlewares
-app.use(cors())
-app.use(express.json())
-
-
-
+app.use(cors());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_KEY}@cluster0.hf0b3tt.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -21,7 +17,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -30,44 +26,67 @@ async function run() {
     await client.connect();
 
     // DATABASE collection STARTS
-    const surveysCollection = client.db("survyticsDB").collection("surveys")
+    const surveysCollection = client.db("survyticsDB").collection("surveys");
+    const usersCollection = client.db("survyticsDB").collection("users");
     // DATABASE collection ENDS
 
-    // GET; all the surveys on surveys page
-    app.get("/surveys", async(req,res)=>{
+    // GET; all the surveys on surveys page with search and sort 
+    app.get("/surveys", async (req, res) => {
       const filter = req.query;
-      let query = {}
-      if(filter?.search){
+      let query = {};
+      if (filter?.search) {
         query = {
-          title:{$regex: filter.search, $options: "i"}
-        }
+          title: { $regex: filter.search, $options: "i" },
+        };
       }
-      if(filter.category){
+      if (filter.category) {
         query = {
-          category: filter.category
-        }
+          category: filter.category,
+        };
       }
-     
-      let options = {}
-      if(filter?.sort){
+      let options = {};
+      if (filter?.sort) {
         options = {
           // TODO: change the like property to totalVote
           sort: {
-            like: filter.sort === "asc" ? 1 : -1
-          }
-        }
+            like: filter.sort === "asc" ? 1 : -1,
+          },
+        };
       }
-     
-      const result = await surveysCollection.find(query, options).toArray()
+      const result = await surveysCollection.find(query, options).toArray();
+      res.send(result);
+    });
+
+    // GET; a single survey
+    app.get("/survey/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await surveysCollection.findOne(query);
+      res.send(result);
+    });
+
+
+    // POST; a user
+    app.post("/users", async(req,res)=>{
+      const user = req.body;
+      
+      const result = await usersCollection.insertOne(user)
       res.send(result)
     })
 
 
 
 
+
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -75,16 +94,10 @@ async function run() {
 }
 run().catch(console.dir);
 
+app.get("/", (req, res) => {
+  res.send("Survytisc is running");
+});
 
-
-
-
-
-
-app.get("/", (req,res)=>{
-    res.send("Survytisc is running")
-})
-
-app.listen(port,()=>{
-    console.log(`Server is running on ${port}`)
-})
+app.listen(port, () => {
+  console.log(`Server is running on ${port}`);
+});
