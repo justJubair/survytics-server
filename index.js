@@ -28,6 +28,36 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    // DATABASE collection STARTS
+    const surveysCollection = client.db("survyticsDB").collection("surveys")
+    // DATABASE collection ENDS
+
+    // GET; all the surveys on surveys page
+    app.get("/surveys", async(req,res)=>{
+      const filter = req.query;
+      let query = {}
+      if(filter?.search){
+        query = {
+          title:{$regex: filter.search, $options: "i"}
+        }
+      }
+      let options = {}
+      if(filter?.sort){
+        options = {
+          sort: {
+            like: filter.sort === "asc" ? 1 : -1
+          }
+        }
+      }
+     
+      const result = await surveysCollection.find(query, options).toArray()
+      res.send(result)
+    })
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
