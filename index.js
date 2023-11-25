@@ -3,6 +3,7 @@ const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const cors = require("cors");
+const moment = require("moment/moment");
 const port = process.env.PORT || 5000;
 
 // middlewares
@@ -32,6 +33,7 @@ async function run() {
     const surveysCollection = client.db("survyticsDB").collection("surveys");
     const usersCollection = client.db("survyticsDB").collection("users");
     const commentsCollection = client.db("survyticsDB").collection("comments");
+    const votesCollection = client.db("survyticsDB").collection("votes");
     // DATABASE collection ENDS
 
     // GET; all the surveys on surveys page with search and sort 
@@ -70,11 +72,10 @@ async function run() {
       res.send(result);
     });
 
-    // PATCH; increase voteYes by One.
+    // PATCH; increase voteYes and voteNo by one
     app.patch("/survey/:id", async(req,res)=>{
         const id = req?.params.id;
         const {increase, operation} =req?.body
-        console.log(operation)
         const query = {_id: new ObjectId(id)};
         const survey = await surveysCollection.findOne(query)
         const YesVote = survey.VoteYes;
@@ -97,26 +98,6 @@ async function run() {
         const result = await surveysCollection.updateOne(query, updatedDoc)
         res.send(result)
     })
-
-    // PATCH; decrease voteNo by One.
-    // app.patch("/survey/:id", async(req,res)=>{
-    //     const id = req?.params.id;
-    //     const {decrease} =req?.body
-    //     const query = {_id: new ObjectId(id)};
-    //     const survey = await surveysCollection.findOne(query)
-    //     const NoVote = survey.VoteNo;
-    //     if(NoVote<1){
-    //       return res.send()
-    //     }
-        
-    //     const updatedDoc = {
-    //       $set: {
-    //         VoteYes: YesVote+increase
-    //       }
-    //     }
-    //     const result = await surveysCollection.updateOne(query, updatedDoc)
-    //     res.send(result)
-    // })
 
     // POST; a user
     app.post("/users", async(req,res)=>{
@@ -149,7 +130,14 @@ async function run() {
       res.send(result)
     })
 
+    // POST; voting details with user information
+    app.post("/votes", async(req,res)=>{
+      const {votingDetails} = req?.body;
+      votingDetails.time = moment().format("MMM Do YYYY, h:mm a")
+      const result = await votesCollection.insertOne(votingDetails)
+      res.send(result)
 
+    })
 
 
 
