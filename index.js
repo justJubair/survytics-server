@@ -28,20 +28,22 @@ async function run() {
     // DATABASE collection STARTS
     const surveysCollection = client.db("survyticsDB").collection("surveys");
     const usersCollection = client.db("survyticsDB").collection("users");
+    const commentsCollection = client.db("survyticsDB").collection("comments");
     // DATABASE collection ENDS
 
     // GET; all the surveys on surveys page with search and sort 
     app.get("/surveys", async (req, res) => {
       const filter = req.query;
       let query = {};
-      if (filter?.search) {
-        query = {
-          title: { $regex: filter.search, $options: "i" },
-        };
-      }
+      
       if (filter.category) {
         query = {
           category: filter.category,
+        };
+      }
+      if (filter?.search) {
+        query = {
+          title: { $regex: filter.search, $options: "i" },
         };
       }
       let options = {};
@@ -69,12 +71,21 @@ async function run() {
     // POST; a user
     app.post("/users", async(req,res)=>{
       const user = req.body;
-      
+      const query = {email: user?.email}
+      const isExist = await usersCollection.findOne(query)
+      if(isExist){
+        return res.send({message: "user already exists"})
+      }
       const result = await usersCollection.insertOne(user)
       res.send(result)
     })
 
-
+    // POST; a comment
+    app.post("/comments", async(req,res)=>{
+      const comment = req?.body;
+      const result = await commentsCollection.insertOne(comment)
+      res.send(result)
+    })
 
 
 
