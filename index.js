@@ -6,7 +6,10 @@ const cors = require("cors");
 const port = process.env.PORT || 5000;
 
 // middlewares
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5173"],
+  credentials: true,
+}));
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_KEY}@cluster0.hf0b3tt.mongodb.net/?retryWrites=true&w=majority`;
@@ -78,6 +81,21 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user)
       res.send(result)
+    })
+
+
+    // GET; comments with survey id query
+    app.get("/comments", async(req,res)=>{
+      query = {}
+      if(req?.query.surveyId){
+        query = {surveyId: req?.query.surveyId}
+
+      }
+      console.log(query)
+      const result = await commentsCollection.find(query).toArray()
+      console.log(result)
+      res.send(result)
+
     })
 
     // POST; a comment
