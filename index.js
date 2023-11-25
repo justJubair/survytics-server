@@ -7,10 +7,12 @@ const moment = require("moment/moment");
 const port = process.env.PORT || 5000;
 
 // middlewares
-app.use(cors({
-  origin: ["http://localhost:5173"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_KEY}@cluster0.hf0b3tt.mongodb.net/?retryWrites=true&w=majority`;
@@ -36,11 +38,11 @@ async function run() {
     const votesCollection = client.db("survyticsDB").collection("votes");
     // DATABASE collection ENDS
 
-    // GET; all the surveys on surveys page with search and sort 
+    // GET; all the surveys on surveys page with search and sort
     app.get("/surveys", async (req, res) => {
       const filter = req.query;
       let query = {};
-      
+
       if (filter.category) {
         query = {
           category: filter.category,
@@ -73,75 +75,83 @@ async function run() {
     });
 
     // PATCH; increase voteYes and voteNo by one
-    app.patch("/survey/:id", async(req,res)=>{
-        const id = req?.params.id;
-        const {increase, operation} =req?.body
-        const query = {_id: new ObjectId(id)};
-        const survey = await surveysCollection.findOne(query)
-        const YesVote = survey.VoteYes;
-        const NoVote = survey.VoteNo;
-        let updatedDoc = {}
-        if(operation=== "yes"){
-          updatedDoc = {
-            $set: {
-              VoteYes: YesVote+increase
-            }
-          }
-        } else {
-          updatedDoc = {
-            $set: {
-              VoteNo: NoVote+increase
-            }
-          }
-        }
-        
-        const result = await surveysCollection.updateOne(query, updatedDoc)
-        res.send(result)
-    })
+    app.patch("/survey/:id", async (req, res) => {
+      const id = req?.params.id;
+      const { increase, operation } = req?.body;
+      const query = { _id: new ObjectId(id) };
+      const survey = await surveysCollection.findOne(query);
+      const YesVote = survey.VoteYes;
+      const NoVote = survey.VoteNo;
+      let updatedDoc = {};
+      if (operation === "yes") {
+        updatedDoc = {
+          $set: {
+            VoteYes: YesVote + increase,
+          },
+        };
+      } else {
+        updatedDoc = {
+          $set: {
+            VoteNo: NoVote + increase,
+          },
+        };
+      }
+
+      const result = await surveysCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    });
 
     // POST; a user
-    app.post("/users", async(req,res)=>{
+    app.post("/users", async (req, res) => {
       const user = req.body;
-      const query = {email: user?.email}
-      const isExist = await usersCollection.findOne(query)
-      if(isExist){
-        return res.send({message: "user already exists"})
+      const query = { email: user?.email };
+      const isExist = await usersCollection.findOne(query);
+      if (isExist) {
+        return res.send({ message: "user already exists" });
       }
-      const result = await usersCollection.insertOne(user)
-      res.send(result)
-    })
-
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
 
     // GET; comments with survey id query
-    app.get("/comments", async(req,res)=>{
-      query = {}
-      if(req?.query.surveyId){
-        query = {surveyId: req?.query.surveyId}
-
+    app.get("/comments", async (req, res) => {
+      query = {};
+      if (req?.query.surveyId) {
+        query = { surveyId: req?.query.surveyId };
       }
-      const result = await commentsCollection.find(query).toArray()
-      res.send(result)
-    })
+      const result = await commentsCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // POST; a comment
-    app.post("/comments", async(req,res)=>{
+    app.post("/comments", async (req, res) => {
       const comment = req?.body;
-      const result = await commentsCollection.insertOne(comment)
-      res.send(result)
-    })
+      const result = await commentsCollection.insertOne(comment);
+      res.send(result);
+    });
 
     // POST; voting details with user information
-    app.post("/votes", async(req,res)=>{
-      const {votingDetails} = req?.body;
-      votingDetails.time = moment().format("MMM Do YYYY, h:mm a")
-      const result = await votesCollection.insertOne(votingDetails)
-      res.send(result)
+    app.post("/votes", async (req, res) => {
+      const { votingDetails } = req?.body;
+      votingDetails.time = moment().format("MMM Do YYYY, h:mm a");
+      const result = await votesCollection.insertOne(votingDetails);
+      res.send(result);
+    });
 
-    })
+    // Check if the user is voted or not
+    app.get("/isVoted", async (req, res) => {
+      const { surveyId, userEmail } = req?.query;
+      const query = { surveyId: surveyId };
 
-
-
-
+      const surveys = await votesCollection.find(query).toArray();
+      const isVoted = surveys.find((survey) => survey?.userEmail === userEmail);
+      
+      if (isVoted) {
+       return res.send(true);
+      } else {
+       return res.send(false);
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
