@@ -70,6 +70,53 @@ async function run() {
       res.send(result);
     });
 
+    // PATCH; increase voteYes by One.
+    app.patch("/survey/:id", async(req,res)=>{
+        const id = req?.params.id;
+        const {increase, operation} =req?.body
+        console.log(operation)
+        const query = {_id: new ObjectId(id)};
+        const survey = await surveysCollection.findOne(query)
+        const YesVote = survey.VoteYes;
+        const NoVote = survey.VoteNo;
+        let updatedDoc = {}
+        if(operation=== "yes"){
+          updatedDoc = {
+            $set: {
+              VoteYes: YesVote+increase
+            }
+          }
+        } else {
+          updatedDoc = {
+            $set: {
+              VoteNo: NoVote+increase
+            }
+          }
+        }
+        
+        const result = await surveysCollection.updateOne(query, updatedDoc)
+        res.send(result)
+    })
+
+    // PATCH; decrease voteNo by One.
+    // app.patch("/survey/:id", async(req,res)=>{
+    //     const id = req?.params.id;
+    //     const {decrease} =req?.body
+    //     const query = {_id: new ObjectId(id)};
+    //     const survey = await surveysCollection.findOne(query)
+    //     const NoVote = survey.VoteNo;
+    //     if(NoVote<1){
+    //       return res.send()
+    //     }
+        
+    //     const updatedDoc = {
+    //       $set: {
+    //         VoteYes: YesVote+increase
+    //       }
+    //     }
+    //     const result = await surveysCollection.updateOne(query, updatedDoc)
+    //     res.send(result)
+    // })
 
     // POST; a user
     app.post("/users", async(req,res)=>{
@@ -91,11 +138,8 @@ async function run() {
         query = {surveyId: req?.query.surveyId}
 
       }
-      console.log(query)
       const result = await commentsCollection.find(query).toArray()
-      console.log(result)
       res.send(result)
-
     })
 
     // POST; a comment
