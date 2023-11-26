@@ -1,10 +1,12 @@
-require("dotenv").config();
+const jwt = require("jsonwebtoken")
+const cookieParser = require('cookie-parser')
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const cors = require("cors");
 const moment = require("moment/moment");
 const Stripe = require("stripe");
+require("dotenv").config();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
@@ -16,6 +18,25 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
+
+// jwt middlewares
+const verifyToken = (req,res,next)=>{
+  const token = req?.cookies?.token;
+  if(!token){
+    return res.status(401).send({message: "unauthorized"})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
+    // error
+    if(error){
+      return res.status(401).send({message: "unauthorized"})
+    }
+    // if token is valid then only it would be decoded
+   
+    req.user =decoded
+    next()
+  })
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_KEY}@cluster0.hf0b3tt.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -220,6 +241,32 @@ async function run() {
     })
 
     // STRIPE PAYMENT RELATED API'S ENDS
+    // -------------------------------//
+
+
+    // ------------------------------//
+    // JWT RELATED API'S STARTS
+
+    // create a token
+    app.post("/jwt", async(req,res)=>{
+      const user = req?.body;
+      
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+
+      })
+   
+      res.cookie("token", token, {
+        httpOnly:true,
+        secure:false, // for development
+        // sameSite: "none"
+       
+      })
+      .send({success:true})
+    })
+
+
+    // JWT RELATED API'S ENDS
     // -------------------------------//
 
     // Send a ping to confirm a successful connection
