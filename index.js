@@ -38,6 +38,7 @@ async function run() {
     const usersCollection = client.db("survyticsDB").collection("users");
     const commentsCollection = client.db("survyticsDB").collection("comments");
     const votesCollection = client.db("survyticsDB").collection("votes");
+    const paymentsCollection = client.db("survyticsDB").collection("payments");
     // DATABASE collection ENDS
 
     // GET; all the surveys on surveys page with search and sort
@@ -204,6 +205,19 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
+    // post payment details and update users role
+    app.put("/payments", async(req,res)=>{
+      const payment = req?.body;
+      const userEmail = payment.email
+      const updatedDoc = {
+        $set:{
+          role: payment?.role
+        }
+      }
+      const roleUpdatedResult = await usersCollection.updateOne({email:userEmail}, updatedDoc)
+      const paymentResult = await paymentsCollection.insertOne(payment)
+      res.send({paymentResult, roleUpdatedResult})
+    })
 
     // STRIPE PAYMENT RELATED API'S ENDS
     // -------------------------------//
