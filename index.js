@@ -4,6 +4,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const cors = require("cors");
 const moment = require("moment/moment");
+const Stripe = require("stripe");
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 // middlewares
@@ -58,7 +60,7 @@ async function run() {
         options = {
           // TODO: change the like property to totalVote
           sort: {
-            like: filter.sort === "asc" ? 1 : -1,
+            VoteYes: filter.sort === "asc" ? 1 : -1,
           },
         };
       }
@@ -145,13 +147,66 @@ async function run() {
 
       const surveys = await votesCollection.find(query).toArray();
       const isVoted = surveys.find((survey) => survey?.userEmail === userEmail);
-      
+
       if (isVoted) {
-       return res.send(true);
+        return res.send(true);
       } else {
-       return res.send(false);
+        return res.send(false);
       }
     });
+
+    // PATCH; increase likes and dislikes
+    app.patch("/surveyLikesAndDislikes/:id", async (req, res) => {
+      const surveyId = req?.params.id;
+      const { increase, operation } = req?.body;
+      const survey = await surveysCollection.findOne({
+        _id: new ObjectId(surveyId),
+      });
+      const likes = survey.like;
+      const dislikes = survey.dislike;
+
+      let updatedDoc = {};
+      if (operation === "like") {
+        updatedDoc = {
+          $set: {
+            like: likes + increase,
+          },
+        };
+      } else {
+        updatedDoc = {
+          $set: {
+            dislike: dislikes + increase,
+          },
+        };
+      }
+      const result = await surveysCollection.updateOne(
+        { _id: new ObjectId(surveyId) },
+        updatedDoc
+      );
+      res.send(result);
+    });
+
+    //  ----------------------------//
+    // STRIPE PAYMENT RELATED API'S STARTS
+
+    // payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req?.body;
+      const amount = parseInt(price * 100);
+
+      // create payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+    // STRIPE PAYMENT RELATED API'S ENDS
+    // -------------------------------//
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
