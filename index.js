@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken")
-const cookieParser = require('cookie-parser')
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
@@ -21,22 +21,22 @@ app.use(express.json());
 app.use(cookieParser());
 
 // jwt middlewares
-const verifyToken = (req,res,next)=>{
+const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
-  if(!token){
-    return res.status(401).send({message: "unauthorized"})
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized" });
   }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
     // error
-    if(error){
-      return res.status(401).send({message: "unauthorized"})
+    if (error) {
+      return res.status(401).send({ message: "unauthorized" });
     }
     // if token is valid then only it would be decoded
-   
-    req.user =decoded
-    next()
-  })
-}
+
+    req.user = decoded;
+    next();
+  });
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_KEY}@cluster0.hf0b3tt.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -227,44 +227,50 @@ async function run() {
       });
     });
     // post payment details and update users role
-    app.put("/payments", async(req,res)=>{
+    app.put("/payments", async (req, res) => {
       const payment = req?.body;
-      const userEmail = payment.email
+      const userEmail = payment.email;
       const updatedDoc = {
-        $set:{
-          role: payment?.role
-        }
-      }
-      const roleUpdatedResult = await usersCollection.updateOne({email:userEmail}, updatedDoc)
-      const paymentResult = await paymentsCollection.insertOne(payment)
-      res.send({paymentResult, roleUpdatedResult})
-    })
+        $set: {
+          role: payment?.role,
+        },
+      };
+      const roleUpdatedResult = await usersCollection.updateOne(
+        { email: userEmail },
+        updatedDoc
+      );
+      const paymentResult = await paymentsCollection.insertOne(payment);
+      res.send({ paymentResult, roleUpdatedResult });
+    });
 
     // STRIPE PAYMENT RELATED API'S ENDS
     // -------------------------------//
-
 
     // ------------------------------//
     // JWT RELATED API'S STARTS
 
     // create a token
-    app.post("/jwt", async(req,res)=>{
+    app.post("/jwt", async (req, res) => {
       const user = req?.body;
-      
+
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
+      });
 
-      })
-   
-      res.cookie("token", token, {
-        httpOnly:true,
-        secure:false, // for development
-        // sameSite: "none"
-       
-      })
-      .send({success:true})
-    })
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false, // for development
+          // sameSite: "none"
+        })
+        .send({ success: true });
+    });
 
+    // clear token
+    app.post("/logout", (req, res) => {
+      const user = req?.body;
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
 
     // JWT RELATED API'S ENDS
     // -------------------------------//
