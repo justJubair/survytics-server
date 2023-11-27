@@ -107,6 +107,24 @@ async function run() {
       res.send(result);
     });
 
+    // PUT; update a survey by surveyor
+    app.put("/survey/:id", async(req,res)=>{
+      const id = req?.params.id;
+      const survey = req?.body;
+      const filter = {_id: new ObjectId(id)}
+      const updatedDoc = {
+        $set: {
+          title: survey?.title,
+          question: survey?.question,
+          category: survey?.category,
+          deadline: survey?.deadline,
+          description: survey?.description,
+        }
+      }
+      const result = await surveysCollection.updateOne(filter, updatedDoc)
+      res.send(result)
+    })
+
     // PATCH; increase voteYes and voteNo by one
     app.patch("/survey/:id", async (req, res) => {
       const id = req?.params.id;
