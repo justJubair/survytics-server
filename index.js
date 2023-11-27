@@ -98,6 +98,14 @@ async function run() {
       res.send(result);
     });
 
+    // POST; a survey by surveyor only
+    app.post("/surveys", async(req,res)=>{
+      const survey = req?.body
+      survey.Timestamp = moment().format("MMM Do YYYY, h:mm a");
+      const result = await surveysCollection.insertOne(survey)
+      res.send(result)
+    })
+
     // PATCH; increase voteYes and voteNo by one
     app.patch("/survey/:id", async (req, res) => {
       const id = req?.params.id;
