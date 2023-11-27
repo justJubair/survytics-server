@@ -235,6 +235,14 @@ async function run() {
       res.send(result);
     });
 
+    // Get; reports by survey ids
+    app.get("/reports", async(req,res)=>{
+      const surveyId = req?.query?.surveyId;
+      const query = {surveyId: surveyId}
+      const result = await reportsCollection.find(query).toArray()
+      res.send(result)
+    })
+
     // POST; a report by user
     app.post("/reports", async (req, res) => {
       const report = req?.body;
