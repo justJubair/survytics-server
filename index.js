@@ -83,7 +83,7 @@ async function run() {
         options = {
           // TODO: change the like property to totalVote
           sort: {
-            VoteYes: filter.sort === "asc" ? 1 : -1,
+            totalVote: filter.sort === "asc" ? 1 : -1,
           },
         };
       }
@@ -108,10 +108,10 @@ async function run() {
     });
 
     // PUT; update a survey by surveyor
-    app.put("/survey/:id", async(req,res)=>{
+    app.put("/survey/:id", async (req, res) => {
       const id = req?.params.id;
       const survey = req?.body;
-      const filter = {_id: new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
           title: survey?.title,
@@ -119,11 +119,11 @@ async function run() {
           category: survey?.category,
           deadline: survey?.deadline,
           description: survey?.description,
-        }
-      }
-      const result = await surveysCollection.updateOne(filter, updatedDoc)
-      res.send(result)
-    })
+        },
+      };
+      const result = await surveysCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
     // PATCH; increase voteYes and voteNo by one
     app.patch("/survey/:id", async (req, res) => {
@@ -131,6 +131,7 @@ async function run() {
       const { increase, operation } = req?.body;
       const query = { _id: new ObjectId(id) };
       const survey = await surveysCollection.findOne(query);
+      const TotalVote = survey.totalVote;
       const YesVote = survey.VoteYes;
       const NoVote = survey.VoteNo;
       let updatedDoc = {};
@@ -138,18 +139,31 @@ async function run() {
         updatedDoc = {
           $set: {
             VoteYes: YesVote + increase,
+            totalVote: TotalVote + increase,
           },
         };
       } else {
         updatedDoc = {
           $set: {
             VoteNo: NoVote + increase,
+            totalVote: TotalVote + increase,
           },
         };
       }
 
       const result = await surveysCollection.updateOne(query, updatedDoc);
       res.send(result);
+    });
+
+    // GET; users role
+    app.get("/role", async (req, res) => {
+      let query = {}
+      if(req?.query?.email){
+        query = {email: req?.query.email}
+      }
+      const user = await usersCollection.findOne(query);
+      const role = user?.role;
+      res.send(role);
     });
 
     // POST; a user
@@ -236,17 +250,39 @@ async function run() {
     });
 
     // Get; reports by survey ids
-    app.get("/reports", async(req,res)=>{
+    app.get("/reports", async (req, res) => {
       const surveyId = req?.query?.surveyId;
-      const query = {surveyId: surveyId}
-      const result = await reportsCollection.find(query).toArray()
-      res.send(result)
-    })
+      const query = { surveyId: surveyId };
+      const result = await reportsCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // POST; a report by user
     app.post("/reports", async (req, res) => {
       const report = req?.body;
       const result = await reportsCollection.insertOne(report);
+      res.send(result);
+    });
+
+    // GET; all the votes
+    app.get("/votes", async (req, res) => {
+      const result = await surveysCollection
+        .aggregate([
+          {
+            $addFields: {
+              surveyIdAsString: { $toString: "$_id" },
+            },
+          },
+          {
+            $lookup: {
+              from: "votes",
+              localField: "surveyIdAsString",
+              foreignField: "surveyId",
+              as: "participants",
+            },
+          },
+        ])
+        .toArray();
       res.send(result);
     });
 
