@@ -60,6 +60,7 @@ async function run() {
     const commentsCollection = client.db("survyticsDB").collection("comments");
     const votesCollection = client.db("survyticsDB").collection("votes");
     const paymentsCollection = client.db("survyticsDB").collection("payments");
+    const reportsCollection = client.db("survyticsDB").collection("reports");
     // DATABASE collection ENDS
 
     // GET; all the surveys on surveys page with search and sort
@@ -99,12 +100,12 @@ async function run() {
     });
 
     // POST; a survey by surveyor only
-    app.post("/surveys", async(req,res)=>{
-      const survey = req?.body
+    app.post("/surveys", async (req, res) => {
+      const survey = req?.body;
       survey.Timestamp = moment().format("MMM Do YYYY, h:mm a");
-      const result = await surveysCollection.insertOne(survey)
-      res.send(result)
-    })
+      const result = await surveysCollection.insertOne(survey);
+      res.send(result);
+    });
 
     // PATCH; increase voteYes and voteNo by one
     app.patch("/survey/:id", async (req, res) => {
@@ -213,6 +214,13 @@ async function run() {
         { _id: new ObjectId(surveyId) },
         updatedDoc
       );
+      res.send(result);
+    });
+
+    // POST; a report by user
+    app.post("/reports", async (req, res) => {
+      const report = req?.body;
+      const result = await reportsCollection.insertOne(report);
       res.send(result);
     });
 
