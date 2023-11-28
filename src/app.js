@@ -1,10 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const applyMiddleware = require("./middlewares/applyMiddleware");
+const connectDB = require("./db/connectDB");
 const app = express();
 const port = process.env.PORT || 5000;
 
+const authenticationRoutes = require("./routes/authentication/index")
+
 applyMiddleware(app)
+app.use(authenticationRoutes)
+
+
+
+
 
 app.get("/health", (req, res) => {
     res.send("Survytics is running mongoose");
@@ -22,7 +30,13 @@ app.get("/health", (req, res) => {
     })
   })
   
-  app.listen(port, () => {
-    console.log(`Server is running on ${port}`);
-  });
+  const main= async()=>{
+    await connectDB();
+    
+    app.listen(port, () => {
+      console.log(`Server is running on ${port}`);
+    });
+  }
+
+  main()
   
