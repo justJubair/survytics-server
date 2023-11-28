@@ -13,7 +13,8 @@ const port = process.env.PORT || 5000;
 // middlewares
 app.use(
   cors({
-    origin: ["https://survytics-client.web.app","https://survytics-client.firebaseapp.com"],
+    // origin: ["https://survytics-client.web.app","https://survytics-client.firebaseapp.com"],
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
@@ -386,8 +387,9 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: true, // for development
-          sameSite: "none"
+          // secure: true, // for development
+          // sameSite: "none" // for development
+          secure: false,
         })
         .send({ success: true });
     });
