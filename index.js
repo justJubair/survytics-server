@@ -328,6 +328,12 @@ async function run() {
       res.send(result);
     });
 
+    // GET; all the payments
+    app.get("/payments", async(req,res)=>{
+      const result = await paymentsCollection.find().toArray()
+      res.send(result)
+    })
+
     //  ----------------------------//
     // STRIPE PAYMENT RELATED API'S STARTS
 
