@@ -185,7 +185,7 @@ async function run() {
     });
 
     // GET; all the users for admin
-    app.get('/users', async(req,res)=>{
+    app.get('/users',verifyToken, async(req,res)=>{
       let query = {}
       if(req?.query?.userFilter){
         query = {role:req?.query?.userFilter}
