@@ -125,6 +125,23 @@ async function run() {
       res.send(result);
     });
 
+    // PUT; unpublish a survey and post a feedback message
+    app.put("/surveyUnpublish/:id", async(req,res)=>{
+      const adminMessage = req?.body;
+      const id = req?.params.id;
+      const filter = {_id: new ObjectId(id)}
+      
+      const updatedDoc = {
+        $set:{
+          status: "unpublished"
+        }
+      }
+      const statusResult = await surveysCollection.updateOne(filter, updatedDoc);
+      const adminMessageResult = await reportsCollection.insertOne(adminMessage)
+      res.send({statusResult, adminMessageResult})
+
+    })
+
     // PATCH; increase voteYes and voteNo by one
     app.patch("/survey/:id", async (req, res) => {
       const id = req?.params.id;
@@ -161,10 +178,21 @@ async function run() {
       if(req?.query?.email){
         query = {email: req?.query.email}
       }
+    
       const user = await usersCollection.findOne(query);
       const role = user?.role;
       res.send(role);
     });
+
+    // GET; all the users for admin
+    app.get('/users', async(req,res)=>{
+      let query = {}
+      if(req?.query?.userFilter){
+        query = {role:req?.query?.userFilter}
+      }
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
+    })
 
     // POST; a user
     app.post("/users", async (req, res) => {
@@ -177,6 +205,20 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
+
+    // PATCH; update a users role via admin
+    app.patch("/user/:id", async(req,res)=>{
+      const id = req.params.id;
+      const role = req?.body;
+      const filter = {_id: new ObjectId(id)}
+      const updatedDoc = {
+        $set:{
+          role: role?.value
+        }
+      }
+        const result = await usersCollection.updateOne(filter, updatedDoc)
+        res.send(result)
+    })
 
     // GET; comments with survey id query
     app.get("/comments", async (req, res) => {
