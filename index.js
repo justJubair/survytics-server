@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 // middlewares
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["https://survytics-client.web.app","https://survytics-client.firebaseapp.com"],
     credentials: true,
   })
 );
@@ -52,7 +52,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // DATABASE collection STARTS
     const surveysCollection = client.db("survyticsDB").collection("surveys");
@@ -386,8 +386,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false, // for development
-          // sameSite: "none"
+          secure: true, // for development
+          sameSite: "none"
         })
         .send({ success: true });
     });
@@ -402,7 +402,7 @@ async function run() {
     // -------------------------------//
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
