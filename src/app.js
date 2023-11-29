@@ -10,6 +10,7 @@ const surveyRoutes = require("./routes/surveys/index")
 const userRoutes = require("./routes/users/index")
 const reportRoutes = require("./routes/reports/index")
 const voteRoutes = require("./routes/votes/index")
+const commentRoutes=require("./routes/comments/index")
 
 applyMiddleware(app)
 app.use(authenticationRoutes)
@@ -17,6 +18,7 @@ app.use(surveyRoutes)
 app.use(userRoutes)
 app.use(reportRoutes)
 app.use(voteRoutes)
+app.use(commentRoutes)
 
 
 
