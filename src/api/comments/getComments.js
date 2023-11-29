@@ -4,7 +4,7 @@ const getComments = async (req, res) => {
     if (req?.query.surveyId) {
       query = { surveyId: req?.query.surveyId };
     }
-    console.log(query)
+  
     const result = await Comments.find(query);
     res.send(result);
   }
