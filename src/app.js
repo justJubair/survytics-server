@@ -8,12 +8,13 @@ const port = process.env.PORT || 5000;
 const authenticationRoutes = require("./routes/authentication/index")
 const surveyRoutes = require("./routes/surveys/index")
 const userRoutes = require("./routes/users/index")
+const reportRoutes = require("./routes/reports/index")
 
 applyMiddleware(app)
 app.use(authenticationRoutes)
 app.use(surveyRoutes)
 app.use(userRoutes)
-
+app.use(reportRoutes)
 
 
 
