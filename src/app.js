@@ -6,9 +6,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const authenticationRoutes = require("./routes/authentication/index")
+const surveyRoutes = require("./routes/surveys/index")
 
 applyMiddleware(app)
 app.use(authenticationRoutes)
+app.use(surveyRoutes)
 
 
 
