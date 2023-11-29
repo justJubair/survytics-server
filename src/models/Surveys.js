@@ -24,28 +24,23 @@ const SurveySchema = new Schema({
   },
   like: {
     type: Number,
-    required: true,
   },
   dislike: {
     type: Number,
-    required: true,
   },
   VoteYes: {
     type: Number,
-    required: true,
   },
   VoteNO: {
     type: Number,
-    required: true,
   },
   status: {
     type: String,
-    required: true,
   },
   totalVote: {
     type: Number,
-    required: true,
   },
+  Timestamp: String
 });
 
 const Surveys = mongoose.model("Surveys", SurveySchema);

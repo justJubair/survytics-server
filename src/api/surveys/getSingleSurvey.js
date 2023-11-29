@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Surveys = require("../../models/Surveys")
 
 const getSingleSurvey = async (req, res) => {
