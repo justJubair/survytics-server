@@ -10,9 +10,9 @@ const createCookieToken = async (req, res) => {
     res
       .cookie("token", token, {
         httpOnly: true,
-        // secure: true, // for development
-        // sameSite: "none" // for development
-        secure: false,
+        secure: true, // for development
+        sameSite: "none" // for development
+        // secure: false,
       })
       .send({ success: true });
 }

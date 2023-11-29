@@ -5,8 +5,8 @@ const applyMiddleware = (app)=>{
 // middlewares
 app.use(
     cors({
-      // origin: ["https://survytics-client.web.app","https://survytics-client.firebaseapp.com"],
-      origin: ["http://localhost:5173"],
+      origin: ["https://survytics-client.web.app","https://survytics-client.firebaseapp.com"],
+      // origin: ["http://localhost:5173"],
       credentials: true,
     })
   );

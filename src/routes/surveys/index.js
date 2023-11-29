@@ -8,6 +8,7 @@ const updateVote = require("../../api/surveys/updateVote");
 const getAllVotes = require("../../api/surveys/getAllVotes");
 const updateLikeDislike = require("../../api/surveys/updateLikeDislike");
 const publishSurvey = require("../../api/surveys/publishSurvey");
+const getSurveyDashboard = require("../../api/surveys/getSurveyDashboard");
 
 const router = express.Router();
 
@@ -17,7 +18,10 @@ router.get("/survey/:id", getSingleSurvey);
 
 router.post("/surveys", postSurvey);
 
-router.put("/survey/:id", updateSurvey);
+// GET; a single survey in the dashboard route
+router.get("/dashboard/updateSurvey/:id", getSurveyDashboard)
+
+router.put("/updateSurvey/:id", updateSurvey);
 
 router.put("/surveyUnpublish/:id", updateSurveyStatus);
 

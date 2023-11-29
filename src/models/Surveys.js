@@ -4,23 +4,23 @@ const { Schema } = mongoose;
 const SurveySchema = new Schema({
   title: {
     type: String,
-    required: true,
+   
   },
   question: {
     type: String,
-    required: true,
+    
   },
   description: {
     type: String,
-    required: true,
+    
   },
   category: {
     type: String,
-    required: true,
+    
   },
   deadline: {
     type: String,
-    required: true,
+    
   },
   like: {
     type: Number,
