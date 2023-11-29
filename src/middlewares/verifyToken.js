@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
       }
       // if token is valid then only it would be decoded
   
-      req.user = decoded;
+      req.decoded = decoded;
       
       next();
     });
