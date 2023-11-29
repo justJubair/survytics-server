@@ -6,6 +6,7 @@ const postSurvey = async (req, res) => {
     survey.Timestamp = moment().format("MMM Do YYYY, h:mm a");
     
     const result = await Surveys.create(survey);
+   
     res.send(result)
 }
 

@@ -31,15 +31,13 @@ const SurveySchema = new Schema({
   VoteYes: {
     type: Number,
   },
-  VoteNO: {
+  VoteNo: {
     type: Number,
   },
   status: {
     type: String,
   },
-  totalVote: {
-    type: Number,
-  },
+  totalVote: Number,
   Timestamp: String
 });
 
