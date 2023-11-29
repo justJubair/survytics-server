@@ -6,9 +6,9 @@ const updateSurvey = require("../../api/surveys/updateSurvey");
 const updateSurveyStatus = require("../../api/surveys/updateSurveyStatus");
 const updateVote = require("../../api/surveys/updateVote");
 const getAllVotes = require("../../api/surveys/getAllVotes");
+const updateLikeDislike = require("../../api/surveys/updateLikeDislike");
 
-
-const router = express.Router()
+const router = express.Router();
 
 router.get("/surveys", getSurveys);
 
@@ -18,12 +18,14 @@ router.post("/surveys", postSurvey);
 
 router.put("/survey/:id", updateSurvey);
 
-router.put("/surveyUnpublish/:id", updateSurveyStatus)
+router.put("/surveyUnpublish/:id", updateSurveyStatus);
 
 router.get("/votes", getAllVotes);
 
-  // PATCH; increase voteYes and voteNo by one
+// PATCH; increase voteYes and voteNo by one
 router.patch("/survey/:id", updateVote);
 
+// PATCH; increase likes and dislikes
+router.patch("/surveyLikesAndDislikes/:id", updateLikeDislike);
 
-module.exports =router
+module.exports = router;
