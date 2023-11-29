@@ -12,6 +12,7 @@ const reportRoutes = require("./routes/reports/index")
 const voteRoutes = require("./routes/votes/index")
 const commentRoutes=require("./routes/comments/index")
 const paymentRoutes=require("./routes/payments/index")
+const stripeRoutes=require("./routes/stripe/index")
 
 applyMiddleware(app)
 app.use(authenticationRoutes)
@@ -21,6 +22,7 @@ app.use(reportRoutes)
 app.use(voteRoutes)
 app.use(commentRoutes)
 app.use(paymentRoutes)
+app.use(stripeRoutes)
 
 
 
@@ -41,13 +43,13 @@ app.get("/health", (req, res) => {
     })
   })
   
-  const main= async()=>{
-    await connectDB();
+  // const main= async()=>{
+  //   await connectDB();
     
-    app.listen(port, () => {
-      console.log(`Server is running on ${port}`);
-    });
-  }
-
-  main()
+  //   app.listen(port, () => {
+  //     console.log(`Server is running on ${port}`);
+  //   });
+  // }
+module.exports=app
+  // main()
   
